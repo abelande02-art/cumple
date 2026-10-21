@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Feliz Cumpleaños</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rosa:#ffb3cf;
+    --rosa-fuerte:#ff6fa5;
+    --sobre-1:#fde3ec;
+    --sobre-2:#f7c9d9;
+    --crema:#fff8f4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:#000;color:#fff;font-family:'Cormorant Garamond',Georgia,serif;overflow:hidden}
+  canvas#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+
+  /* ---------- ESCENA 1: PORTADA ---------- */
+  #portada{
+    position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:28px;padding:20px;
+    transition:opacity 1s ease, transform 1s ease;
+  }
+  #portada.fuera{opacity:0;transform:scale(1.15);pointer-events:none}
+  .titulo{
+    font-family:'Great Vibes',cursive;font-size:clamp(48px,11vw,96px);color:var(--rosa);
+    text-shadow:0 0 18px rgba(255,111,165,.55),0 0 42px rgba(255,111,165,.3);
+    text-align:center;line-height:1.1;
+  }
+  .fecha{letter-spacing:.35em;font-size:12px;color:#ddd;text-transform:uppercase;margin-top:-12px;text-align:center}
+  .hint{font-style:italic;font-size:14px;color:#c9c9c9;animation:parpadeo 2.4s infinite}
+  @keyframes parpadeo{50%{opacity:.35}}
+
+  /* Sobre */
+  .sobre-wrap{perspective:900px;cursor:pointer;margin:10px 0}
+  .sobre{
+    position:relative;width:min(320px,78vw);aspect-ratio:320/210;
+    filter:drop-shadow(0 0 30px rgba(255,150,190,.35));
+    animation:flota 3.5s ease-in-out infinite;
+    transition:transform .4s;
+  }
+  .sobre-wrap:hover .sobre{transform:scale(1.03)}
+  @keyframes flota{50%{translate:0 -8px}}
+  .sobre .atras{position:absolute;inset:0;background:linear-gradient(160deg,var(--sobre-1),var(--sobre-2));border-radius:6px}
+  .sobre .carta{
+    position:absolute;left:7%;right:7%;top:8%;height:84%;background:var(--crema);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Great Vibes',cursive;font-size:26px;color:#d9578a;
+    transition:transform .9s cubic-bezier(.2,.8,.2,1) .55s;
+  }
+  .sobre .frente{
+    position:absolute;inset:0;border-radius:6px;
+    background:linear-gradient(180deg,#fbd6e3,#f4bed1);
+    clip-path:polygon(0 0,50% 56%,100% 0,100% 100%,0 100%);
+  }
+  .sobre .solapa{
+    position:absolute;left:0;right:0;top:0;height:56%;
+    background:linear-gradient(180deg,#fff0f5,#f9d4e1);
+    clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top;transition:transform .7s ease, z-index 0s .35s;
+    z-index:4;
+  }
+  .sobre .corazon{
+    position:absolute;left:50%;top:50%;width:30px;height:30px;transform:translate(-50%,-50%);
+    z-index:5;transition:opacity .3s,transform .5s;
+  }
+  .sobre .corazon svg{width:100%;height:100%;filter:drop-shadow(0 2px 4px rgba(180,40,90,.5))}
+  .sobre.abierto .solapa{transform:rotateX(180deg);z-index:1}
+  .sobre.abierto .corazon{opacity:0;transform:translate(-50%,-50%) scale(1.8)}
+  .sobre.abierto .carta{transform:translateY(-62%)}
+
+  /* ---------- ESCENA 2: MENSAJE ---------- */
+  #mensaje{
+    position:fixed;inset:0;z-index:1;overflow-y:auto;overflow-x:hidden;
+    opacity:0;pointer-events:none;transition:opacity 1.2s ease .3s;
+    scroll-behavior:smooth;padding:0 0 80px;
+  }
+  #mensaje.visible{opacity:1;pointer-events:auto;z-index:3}
+  .contenido{max-width:880px;margin:0 auto;padding:70px 22px 20px;text-align:center}
+  .contenido h1{
+    font-family:'Great Vibes',cursive;font-weight:400;font-size:clamp(46px,10vw,82px);color:var(--rosa);
+    text-shadow:0 0 18px rgba(255,111,165,.55);line-height:1.15;margin-bottom:40px;
+  }
+  .contenido .sub{letter-spacing:.3em;font-size:12px;text-transform:uppercase;color:#d8d8d8;margin-bottom:46px}
+  .parrafo{
+    font-size:clamp(19px,3.6vw,24px);line-height:1.75;color:#f3e9ee;max-width:640px;margin:0 auto 26px;
+    opacity:0;transform:translateY(22px);transition:opacity 1s ease,transform 1s ease;
+  }
+  .firma{font-family:'Great Vibes',cursive;font-size:clamp(34px,7vw,52px);color:var(--rosa);margin-top:34px}
+
+  /* Galería */
+  .galeria{
+    columns:2;column-gap:16px;margin:50px auto 10px;max-width:820px;
+  }
+  @media(min-width:700px){.galeria{columns:3}}
+  .foto{
+    break-inside:avoid;margin-bottom:18px;background:#fff;padding:9px 9px 34px;border-radius:3px;
+    box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 22px rgba(255,111,165,.15);
+    transform:rotate(var(--r,0deg)) translateY(40px);opacity:0;
+    transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1);
+    cursor:zoom-in;position:relative;
+  }
+  .foto.in{opacity:1;transform:rotate(var(--r,0deg)) translateY(0)}
+  .foto:hover{transform:rotate(0deg) scale(1.04);z-index:2}
+  .foto .marco{position:relative;overflow:hidden;background:#eee}
+  .foto img{display:block;width:100%;height:auto;background:#eee}
+  .foto .pie{
+    position:absolute;left:0;right:0;bottom:7px;text-align:center;
+    font-family:'Great Vibes',cursive;color:#b8456f;font-size:19px;line-height:1;
+  }
+  .foto.ph .hueco{
+    display:flex;align-items:center;justify-content:center;aspect-ratio:var(--ar,4/5);
+    background:linear-gradient(160deg,#ffd9e6,#ffb3cf);
+  }
+  .foto.ph .hueco svg{width:44px;height:44px;opacity:.85}
+  .foto.ph img{display:none}
+  .foto:not(.ph) .hueco{display:none}
+
+  /* Lightbox */
+  #lightbox{
+    position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:50;display:none;
+    align-items:center;justify-content:center;padding:20px;cursor:zoom-out;
+  }
+  #lightbox.on{display:flex}
+  #lightbox img{max-width:100%;max-height:88vh;border:8px solid #fff;border-bottom-width:30px;border-radius:3px;box-shadow:0 0 50px rgba(255,111,165,.35)}
+
+  /* Corazones flotando */
+  .corazon-flota{
+    position:fixed;bottom:-40px;z-index:4;pointer-events:none;color:var(--rosa-fuerte);
+    animation:sube linear forwards;opacity:.8;
+  }
+  @keyframes sube{to{transform:translateY(-115vh) rotate(25deg);opacity:0}}
+
+  /* Botón música */
+  #musica{
+    position:fixed;top:14px;right:14px;z-index:60;width:42px;height:42px;border-radius:50%;
+    border:1px solid rgba(255,179,207,.5);background:rgba(0,0,0,.5);color:var(--rosa);font-size:18px;
+    cursor:pointer;display:none;backdrop-filter:blur(6px);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<button id="musica" aria-label="Música">♪</button>
+
+<!-- PORTADA -->
+<section id="portada">
+  <h1 class="titulo" id="tituloPortada">Feliz Cumpleaños</h1>
+
+  <div class="sobre-wrap" id="sobreWrap">
+    <div class="sobre" id="sobre">
+      <div class="atras"></div>
+      <div class="carta"><span id="cartaTexto">Para ti</span></div>
+      <div class="frente"></div>
+      <div class="solapa"></div>
+      <div class="corazon">
+        <svg viewBox="0 0 24 24"><path fill="#ec5b8f" d="M12 21s-7.5-4.6-9.6-9.3C.8 8.2 2.8 4.5 6.3 4.5c2 0 3.7 1.1 4.7 2.7h2c1-1.6 2.7-2.7 4.7-2.7 3.5 0 5.5 3.7 3.9 7.2C19.5 16.4 12 21 12 21z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Toca el sobre para abrir tu sorpresa</p>
+</section>
+
+<!-- MENSAJE -->
+<section id="mensaje">
+  <div class="contenido">
+    <h1 id="tituloMensaje"></h1>
+    <div id="parrafos"></div>
+    <div class="galeria" id="galeria"></div>
+    <p class="firma" id="firma"></p>
+  </div>
+</section>
+
+<div id="lightbox"><img alt=""></div>
+
+<script>
+/* =====================================================
+   ✏️  EDITA AQUÍ TODO LO QUE QUIERAS PERSONALIZAR
+   ===================================================== */
+const CONFIG = {
+  titulo:  "Feliz Cumpleaños",
+  nombre:  "Mi amor hermoso",            // aparece en la carta y en el título del mensaje
+  fecha:   "21 de octubre de 2026",
+  textoCarta: "Para ti",                 // texto que se ve en la carta al abrir el sobre
+
+  // Tu mensaje: cada línea entre comillas es un párrafo nuevo
+  mensaje: [
+    "Feliz cumpleaños a la más lolera de todas.",
+    "Hoy, hace 3 años, no me imaginé compartir otro cumpleaños junto a ti, y míranos, felices y contentos. Quiero pasar este día tan especial muchos más años junto a ti.",
+    "Gracias por todo: cada risa, cada abrazo, cada regaño, por todo lo que hemos vivido juntos. Siempre te lo he dicho: cada día junto a ti es el más especial y se vuelve lo más hermoso de la semana.",
+    "Espero poder compartir contigo mucho más, y aquí unos recuerdos de estos hermosos días.",
+    "Te amo mucho, feliz cumpleaños <3"
+  ],
+  firma: "",
+
+  // Tus fotos: pon los archivos en la carpeta "fotos" y escribe aquí sus nombres.
+  // "pie" es el textico bajo la foto (puedes dejarlo vacío: "")
+  fotos: [
+    // Si una foto sale acostada, agrégale  rotar: 90  (o 270 / 180) a su línea. Ejemplo:
+    //   { src: "fotos/foto3.jpg", pie: "", rotar: 90 },
+    { src: "fotos/foto1.jpg",  pie: "" },
+    { src: "fotos/foto2.jpg",  pie: "" },
+    { src: "fotos/foto3.jpg",  pie: "" },
+    { src: "fotos/foto4.jpg",  pie: "" },
+    { src: "fotos/foto5.jpg",  pie: "" },
+    { src: "fotos/foto6.jpg",  pie: "" },
+    { src: "fotos/foto7.jpg",  pie: "" },
+    { src: "fotos/foto8.jpg",  pie: "" },
+    { src: "fotos/foto9.jpg",  pie: "" },
+    { src: "fotos/foto10.jpg", pie: "" },
+    { src: "fotos/foto11.jpg", pie: "" },
+    { src: "fotos/foto12.jpg", pie: "" },
+    { src: "fotos/foto13.jpg", pie: "" }
+  ],
+
+  youtube: "sz7AHzF-M8w",   // música desde YouTube: el código del video (lo que va después de v=). Déjalo "" para no usar
+  musica: ""                // alternativa: "musica.mp3" (archivo en la misma carpeta). Solo se usa si "youtube" está vacío
+};
+/* ===================================================== */
+
+const heartSVG = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M12 21s-7.5-4.6-9.6-9.3C.8 8.2 2.8 4.5 6.3 4.5c2 0 3.7 1.1 4.7 2.7h2c1-1.6 2.7-2.7 4.7-2.7 3.5 0 5.5 3.7 3.9 7.2C19.5 16.4 12 21 12 21z"/></svg>`;
+
+/* ---- Textos ---- */
+document.title = CONFIG.titulo;
+document.getElementById('tituloPortada').textContent = CONFIG.titulo;
+document.getElementById('cartaTexto').textContent = CONFIG.textoCarta;
+document.getElementById('tituloMensaje').textContent = CONFIG.nombre;
+document.getElementById('firma').textContent = CONFIG.firma;
+
+const cont = document.getElementById('parrafos');
+CONFIG.mensaje.forEach(t=>{
+  const p = document.createElement('p'); p.className='parrafo'; p.textContent=t; cont.appendChild(p);
+});
+
+const gal = document.getElementById('galeria');
+const rot = [-3,2.5,-1.5,3,-2.5,1.5,-3.5,2];
+CONFIG.fotos.forEach((f,i)=>{
+  const d = document.createElement('div');
+  d.className='foto';
+  d.style.setProperty('--r', rot[i%rot.length]+'deg');
+  d.style.setProperty('--ar', i%3===0 ? '4/5' : (i%3===1 ? '1/1' : '3/4'));
+  const grados = (((f.rotar||0)%360)+360)%360;   // 0, 90, 180 o 270
+  d.innerHTML = `<div class="hueco">${heartSVG('#fff')}</div><div class="marco"><img src="${f.src}" alt="" loading="lazy"></div><div class="pie">${f.pie||''}</div>`;
+  const im = d.querySelector('img'), marco = d.querySelector('.marco');
+  im.onerror = ()=> d.classList.add('ph');
+  im.onload = ()=>{
+    if(grados===180){ im.style.transform='rotate(180deg)'; }
+    else if(grados===90 || grados===270){
+      const nw=im.naturalWidth, nh=im.naturalHeight;
+      marco.style.aspectRatio = nh+' / '+nw;
+      im.style.cssText = `position:absolute;left:50%;top:50%;max-width:none;width:${nw/nh*100}%;height:${nh/nw*100}%;transform:translate(-50%,-50%) rotate(${grados}deg)`;
+    }
+  };
+  d.addEventListener('click', ()=>{
+    if(d.classList.contains('ph')) return;
+    const lb = document.getElementById('lightbox'), li = lb.querySelector('img');
+    li.src = f.src;
+    li.style.cssText = '';
+    if(grados===180) li.style.transform='rotate(180deg)';
+    if(grados===90 || grados===270){
+      li.style.cssText = `transform:rotate(${grados}deg);max-width:calc(100vh - 60px);max-height:calc(100vw - 40px);border-width:8px`;
+    }
+    lb.classList.add('on');
+  });
+  gal.appendChild(d);
+});
+document.getElementById('lightbox').addEventListener('click', e=>e.currentTarget.classList.remove('on'));
+
+/* ---- Estrellas ---- */
+(function(){
+  const c = document.getElementById('stars'), x = c.getContext('2d');
+  let W,H,S=[];
+  function size(){
+    W=c.width=innerWidth*devicePixelRatio; H=c.height=innerHeight*devicePixelRatio;
+    S=Array.from({length:Math.min(220,Math.floor(innerWidth*innerHeight/5000))},()=>({
+      x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.2+.3)*devicePixelRatio,
+      p:Math.random()*Math.PI*2,v:Math.random()*.02+.005
+    }));
+  }
+  function draw(){
+    x.clearRect(0,0,W,H);
+    S.forEach(s=>{
+      s.p+=s.v;
+      x.globalAlpha=.35+.55*Math.abs(Math.sin(s.p));
+      x.fillStyle='#fff';
+      x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  addEventListener('resize',size);size();draw();
+})();
+
+/* ---- Corazones flotantes ---- */
+function lanzarCorazon(){
+  const h=document.createElement('div');
+  h.className='corazon-flota';
+  const s=14+Math.random()*22;
+  h.style.left=Math.random()*100+'vw';
+  h.style.width=h.style.height=s+'px';
+  h.style.animationDuration=(6+Math.random()*6)+'s';
+  h.innerHTML=heartSVG(Math.random()>.5?'#ff6fa5':'#ffb3cf');
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),13000);
+}
+let timerCorazones;
+
+/* ---- Abrir sobre ---- */
+let abierto=false;
+document.getElementById('sobreWrap').addEventListener('click',()=>{
+  if(abierto) return; abierto=true;
+  document.getElementById('sobre').classList.add('abierto');
+  for(let i=0;i<10;i++) setTimeout(lanzarCorazon,i*120);
+
+  // música (el clic cuenta como permiso del navegador)
+  if(audio){ audio.play().catch(()=>{}); }
+  if(ytPlayer && ytPlayer.playVideo){ ytPlayer.playVideo(); }
+
+  setTimeout(()=>{
+    document.getElementById('portada').classList.add('fuera');
+    const m=document.getElementById('mensaje');
+    m.classList.add('visible');
+    revelar(m);
+    timerCorazones=setInterval(lanzarCorazon,1400);
+  },2000);
+});
+
+/* ---- Aparecer al hacer scroll ---- */
+function revelar(root){
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){
+        const el=e.target;
+        if(el.classList.contains('foto')) el.classList.add('in');
+        else { el.style.opacity=1; el.style.transform='none'; }
+        io.unobserve(el);
+      }
+    });
+  },{root,threshold:.15});
+  root.querySelectorAll('.parrafo,.foto').forEach(el=>io.observe(el));
+}
+
+/* ---- Música (opcional) ---- */
+let audio=null, ytPlayer=null;
+const btnMusica=document.getElementById('musica');
+
+if(CONFIG.youtube){
+  // Música desde YouTube (necesita internet). Suena al tocar el sobre.
+  const holder=document.createElement('div');
+  holder.style.cssText='position:fixed;bottom:0;right:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1;overflow:hidden';
+  holder.innerHTML='<div id="ytPlayer"></div>';
+  document.body.appendChild(holder);
+  const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+  window.onYouTubeIframeAPIReady=()=>{
+    ytPlayer=new YT.Player('ytPlayer',{
+      width:'200',height:'200',videoId:CONFIG.youtube,
+      playerVars:{playsinline:1,controls:0,rel:0,loop:1,playlist:CONFIG.youtube},
+      events:{
+        onReady:()=>{ ytPlayer.setVolume(70); btnMusica.style.display='block'; if(abierto) ytPlayer.playVideo(); },
+        onStateChange:e=>{ if(e.data===0) ytPlayer.playVideo(); }
+      }
+    });
+  };
+  btnMusica.addEventListener('click',()=>{
+    if(!ytPlayer||!ytPlayer.getPlayerState) return;
+    if(ytPlayer.getPlayerState()===1){ytPlayer.pauseVideo(); btnMusica.style.opacity=.45}
+    else{ytPlayer.playVideo(); btnMusica.style.opacity=1}
+  });
+} else if(CONFIG.musica){
+  audio=new Audio(CONFIG.musica); audio.loop=true; audio.volume=.6;
+  audio.addEventListener('canplaythrough',()=>{btnMusica.style.display='block'},{once:true});
+  audio.addEventListener('error',()=>{audio=null;btnMusica.style.display='none'});
+  btnMusica.addEventListener('click',()=>{
+    if(!audio) return;
+    if(audio.paused){audio.play();btnMusica.style.opacity=1}
+    else{audio.pause();btnMusica.style.opacity=.45}
+  });
+}
+</script>
+</body>
+</html>
